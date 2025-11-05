@@ -1,0 +1,42 @@
+# -------- Paths --------
+csv_manifest: "C:/Users/User/Desktop/경희대/데캡디/mmil_vscode/data/train_manifest.jsonl"
+save_dir: "checkpoints"
+ffmpeg_bin: "C:/Program Files/WinGet/Links/ffmpeg.exe"
+
+# -------- Data --------
+clip_len_sec: 0.5
+vframes_per_clip: 8
+img_size: 224
+sr: 16000
+n_mels: 128
+mel_win_ms: 25
+mel_hop_ms: 10
+
+# -------- Train --------
+batch_size: 4
+epochs: 5
+# 안정화 권장: lr 낮추기
+lr: 0.0001          # ← 0.001 → 0.0001
+weight_decay: 0.0001
+num_workers: 0
+
+# -------- Model dims --------
+video_out_dim: 256
+audio_out_dim: 256
+fuse_dim: 256
+
+# -------- Loss selection --------
+loss_type: "bce_mil"  # "composite" 로 바꾸면 5항 손실 사용
+
+# -------- BCE-MIL params --------
+mil_pool: "lse"       # lse | mean | max | topk
+mil_tau: 2.0          # ← 5.0 → 2.0 (민감도 완화)
+mil_topk_ratio: 0.1
+# pos_weight: 2.0     # (불균형일 때만 선택적으로)
+
+# -------- Composite loss params (loss_type: composite 일 때만 의미) --------
+lam_sp: 0.0001
+lam_norm: 0.0001
+lam_tv: 0.0001
+lam_ag: 0.0
+margin: 0.0

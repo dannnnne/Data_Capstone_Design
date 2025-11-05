@@ -1,0 +1,7 @@
+pyyaml
+tqdm
+numpy
+scipy
+librosa
+soundfile
+opencv-python
