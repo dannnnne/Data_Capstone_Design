@@ -1,92 +1,36 @@
-# Multimodal MIL (Video + Audio) — VS Code Starter
+# Multimodal Fall Detection & Risk Alert Service**
+멀티모달 기반 노인의 낙상 감지 및 위험 알림 서비스**
 
-This is a **minimal, self-contained** PyTorch project to train a bag-level classifier with **Multiple Instance Learning (MIL)** using **online preprocessing**:
-- **Video** → per-clip frame sampling (OpenCV), resized to 224×224
-- **Audio** → Mel-spectrogram (librosa), sliced per clip
-- **Fusion** → Gate-based fusion (audio/video)
-- **Temporal Head** → ED-TCN-like 1D conv head
-- **Loss** → MIL (BCE + LSE pooling by default)
+## Overview
+본 프로젝트는 멀티모달 낙상 감지 시스템을 개발하여, **영상(시각 정보)** 과 **오디오(음향 정보)** 를 함께 활용해 노인의 낙상 여부를 판별하고 위험 알림을 지원합니다. 또한 실제 낙상은 보통 긴 영상 안에서 짧은 구간에만 발생하고, 데이터 라벨이 대개 **비디오 단위(거친 라벨)** 로만 제공되는 한계가 있어, 이를 해결하기 위해 **Multiple Instance Learning(MIL)** 기반의 약지도 학습을 적용했습니다. 즉, 하나의 영상을 Bag으로 보고, 이를 구성하는 짧은 클립/세그먼트를 Instance로 취급합니다. **Bag이 낙상(Positive)** 이라면, 그 안의 적어도 하나의 Instance는 낙상일 것으로 가정하여 학습을 진행합니다.
 
-> Built to mirror the notebook you were using, but runnable as plain Python from VS Code.
+## Reference
+<img src="./image/reference1.png" width="500" />
+<img src="./image/reference2.png" width="500" />
 
+## Pipeline
+<img src="./image/pipeline.png" width="700" />
+
+## Training
+<img src="./image/training.png" width="500" />
+
+## Loss Functions
+<img src="./image/loss.png" width="500" />
 ---
 
-## 1) Create & activate env (Windows PowerShell)
+## Summary
+| Setting | Audio Condition | Core Loss / Method | Accuracy | F1 |
+|---|---|---|---:|---:|
+| A | Audio | Mean-separation MIL | 1.0 | 1.0 |
+| B | Audio | Mean-separation + Sparsity + Normal Suppression | 1.0 | 1.0 |
+| C | Audio | Mean-separation + Sparsity + Normal + Smoothness + Agreement | 1.0 | 1.0 |
+| D | Muted | (C) on muted-audio data | 0.4762 | 0.0 |
+| E | Muted | Max-pooling MIL + Sparsity + Normal + Smoothness + Agreement | 0.4762 | 0.0 |
+| F | Audio | Max-pooling MIL + Sparsity + Normal + Smoothness + Agreement | 1.0 | 1.0 |
+| G | Muted | (E) + Segment-level BCE | 1.0 | 1.0 |
+| H | Audio | (F) + Segment-level BCE | 0.47 | 0.0 |
 
-```powershell
-# Choose one:
-# (A) conda
-conda create -n mmil python=3.10 -y
-conda activate mmil
+실험 결과, 총 8가지 설정 중 6가지(1,2,3,6,7 등)에서 테스트 정확도 1.0이 나왔다. 나머지 방식에 대한 test 결과는 전부 양성으로 예측하기에 출력값을 보고 이에 대한 threshold를 바꿔보는 방식으로 추후에 test 해봐야 할 것 같다. threshold 조정과 loss가 충분히 감소하지 않는데도 정확도가 높게 나오는 현상이 관찰되어 모델 출력값과 학습 과정을 분석해 원인을 분석해야 한다. 마지막으로 데이터 구성이 계속 달라 비교가 어려웠으므로, 이후에는 동일한 데이터셋으로 고정해 실험을 반복하여 공정하게 결과를 비교할 예정이다.
 
-# (B) venv
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-## 2) Install dependencies
-
-> **Install PyTorch first** (CUDA build that matches your GPU).
-> Follow https://pytorch.org/get-started/locally/ then return here.
-
-```powershell
-# Example (CUDA 12.4) — check the official website for the exact command for your GPU
-# pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-
-# Then install the rest:
-pip install -r requirements.txt
-```
-
-If OpenCV cannot decode some videos, install ffmpeg on your system and/or try a different OpenCV build.
-
-## 3) Prepare a manifest (JSONL)
-
-Create a file like `data/train_manifest.jsonl` (one JSON per line):
-
-```json
-{"video": "C:/data/fall01.mp4", "audio": "C:/data/fall01.wav", "label": 1}
-{"video": "C:/data/normal01.mp4", "audio": null,             "label": 0}
-```
-
-> `audio` can be `null`. The loader will replace it with silence for that sample.
-
-## 4) Edit `config.yaml`
-
-- `csv_manifest` → your JSONL path
-- `save_dir` → where to store checkpoints
-- `clip_len_sec`, `vframes_per_clip`, `sr`, `n_mels` as needed
-
-## 5) Run training
-
-```powershell
-python train.py --config config.yaml
-```
-
-- On Windows, the code uses `num_workers=0` by default.
-- Checkpoints will be written to `checkpoints/`.
-
-## 6) Notes
-
-- This starter uses **lightweight stubs** for video/audio encoders so you can test the wiring quickly.
-- Later, swap in real backbones (VideoMAE, PANNs) inside `mmil/model.py`.
-- To start with **MIL only**, it's already configured (other losses are set to 0).
-
----
-
-## Project layout
-
-```
-mmil_vscode/
-├─ config.yaml
-├─ requirements.txt
-├─ train.py
-├─ README.md
-└─ mmil/
-   ├─ __init__.py
-   ├─ config.py
-   ├─ data.py
-   ├─ losses.py
-   └─ model.py
-```
-
-Happy training!
+## Dataset
+- AIHub : <a href="https://www.aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100&dataSetSn=71641">낙상사고 위험동작 영상-센서 쌍 데이터<a>
