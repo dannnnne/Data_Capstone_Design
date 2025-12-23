@@ -1,5 +1,5 @@
-# Multimodal Fall Detection & Risk Alert Service**
-멀티모달 기반 노인의 낙상 감지 및 위험 알림 서비스**
+# Multimodal Fall Detection & Risk Alert Service
+**멀티모달 기반 노인의 낙상 감지 및 위험 알림 서비스**
 
 ## Overview
 본 프로젝트는 멀티모달 낙상 감지 시스템을 개발하여, **영상(시각 정보)** 과 **오디오(음향 정보)** 를 함께 활용해 노인의 낙상 여부를 판별하고 위험 알림을 지원합니다. 또한 실제 낙상은 보통 긴 영상 안에서 짧은 구간에만 발생하고, 데이터 라벨이 대개 **비디오 단위(거친 라벨)** 로만 제공되는 한계가 있어, 이를 해결하기 위해 **Multiple Instance Learning(MIL)** 기반의 약지도 학습을 적용했습니다. 즉, 하나의 영상을 Bag으로 보고, 이를 구성하는 짧은 클립/세그먼트를 Instance로 취급합니다. **Bag이 낙상(Positive)** 이라면, 그 안의 적어도 하나의 Instance는 낙상일 것으로 가정하여 학습을 진행합니다.
