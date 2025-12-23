@@ -20,7 +20,7 @@ class Cfg:
 
     # train
     batch_size: int = 2
-    epochs: int = 5
+    epochs: int = 10
     lr: float = 1e-3
     weight_decay: float = 1e-4
     num_workers: int = 0

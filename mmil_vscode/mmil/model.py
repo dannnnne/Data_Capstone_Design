@@ -44,7 +44,7 @@ class AudioBackboneStub(nn.Module):
             nn.Conv2d(1, 16, kernel_size=5, stride=2, padding=2),
             nn.ReLU(inplace=True),
             nn.Conv2d(16, 32, kernel_size=3, stride=2, padding=1),
-            nn.ReLU(inplace=True),
+            nn.ReLU(inplace=True),   
             nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1),
             nn.ReLU(inplace=True),
             nn.AdaptiveAvgPool2d(1),  # (C,1,1)
